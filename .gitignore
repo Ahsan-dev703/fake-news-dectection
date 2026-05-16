@@ -1,0 +1,81 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.pytest_cache/
+.coverage
+.env
+venv/
+env/
+ENV/
+.venv
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.sublime-project
+.sublime-workspace
+
+# Project specific
+backend/uploads/*
+!backend/uploads/.gitkeep
+models/*.pkl
+models/*.joblib
+*.ipynb_checkpoints/
+
+# EasyOCR models (large files)
+.EasyOCR/
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+*.log
+
+# Video files (uploads)
+*.mp4
+*.avi
+*.mov
+*.mkv
+
+# Image cache
+*.jpg
+*.jpeg
+*.png
+*.gif
+.cache/
+
+# OS
+.DS_Store
+Thumbs.db
