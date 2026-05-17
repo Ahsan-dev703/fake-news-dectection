@@ -91,29 +91,58 @@ class VideoService:
             os.makedirs(frames_dir, exist_ok=True)
 
             frame_paths = []
-            frame_count = 0
             extracted_count = 0
 
             logger.info(
-                f"Extracting frames from {video_path} (sample_rate={sample_rate}, max={max_frames})"
+                f"Extracting frames from {video_path} (sample_rate={sample_rate}, max={max_frames}) using frame seek"
             )
 
-            while True:
-                ret, frame = cap.read()
+            if total_frames <= 0:
+                # Fallback to sequential read if frame count unknown
+                frame_idx = 0
+                while True:
+                    ret, frame = cap.read()
+                    if not ret:
+                        break
+                    if frame_idx % sample_rate == 0 and extracted_count < max_frames:
+                        try:
+                            h, w = frame.shape[:2]
+                            ratio = target_height / h
+                            new_w = int(w * ratio)
+                            resized_frame = cv2.resize(frame, (new_w, target_height))
+                            frame_path = os.path.join(
+                                frames_dir, f"frame_{extracted_count:04d}.jpg"
+                            )
+                            cv2.imwrite(
+                                frame_path,
+                                resized_frame,
+                                [cv2.IMWRITE_JPEG_QUALITY, 85],
+                            )
+                            frame_paths.append(frame_path)
+                            extracted_count += 1
+                        except Exception as e:
+                            logger.warning(
+                                f"Failed to save frame {frame_idx}: {str(e)}"
+                            )
+                    frame_idx += 1
 
-                if not ret:
-                    break
+            else:
+                # Compute evenly spaced frame indices to extract up to max_frames
+                step = max(1, int(total_frames / max_frames))
+                indices = list(range(0, total_frames, step))
 
-                # Extract every Nth frame
-                if frame_count % sample_rate == 0 and extracted_count < max_frames:
+                for idx in indices:
+                    if extracted_count >= max_frames:
+                        break
                     try:
-                        # Resize frame
+                        cap.set(cv2.CAP_PROP_POS_FRAMES, idx)
+                        ret, frame = cap.read()
+                        if not ret or frame is None:
+                            continue
                         h, w = frame.shape[:2]
                         ratio = target_height / h
                         new_w = int(w * ratio)
                         resized_frame = cv2.resize(frame, (new_w, target_height))
-
-                        # Save frame
                         frame_path = os.path.join(
                             frames_dir, f"frame_{extracted_count:04d}.jpg"
                         )
@@ -122,12 +151,8 @@ class VideoService:
                         )
                         frame_paths.append(frame_path)
                         extracted_count += 1
-
                     except Exception as e:
-                        logger.warning(f"Failed to save frame {frame_count}: {str(e)}")
-                        continue
-
-                frame_count += 1
+                        logger.warning(f"Failed to extract frame {idx}: {str(e)}")
 
             cap.release()
 

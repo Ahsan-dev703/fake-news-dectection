@@ -42,7 +42,9 @@ class OCRService:
                 except Exception:
                     gpu = False
 
-                logger.info(f"Initializing EasyOCR reader for languages: {languages} (gpu={gpu})")
+                logger.info(
+                    f"Initializing EasyOCR reader for languages: {languages} (gpu={gpu})"
+                )
 
                 cls._reader = easyocr.Reader(languages, gpu=gpu)
                 # Ensure cache dir exists
@@ -166,7 +168,9 @@ class OCRService:
                 return disk
 
             image = Image.open(io.BytesIO(image_bytes))
-            logger.info(f"Extracting text from image bytes (size: {len(image_bytes)} bytes)")
+            logger.info(
+                f"Extracting text from image bytes (size: {len(image_bytes)} bytes)"
+            )
 
             results = cls._reader.readtext(image)
 
